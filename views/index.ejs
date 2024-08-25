@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>user auth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Check if the URL has the 'welcome' query parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('welcome') === 'true') {
+            alert("Welcome to Friendzy!!");
+        }
+    </script>
+</head>
+<body>
+    <!-- <div class="w-full h-screen bg-sky-200 text-black">
+        <div class="p-20 w-1/2">
+            <h1 class="text-4xl my-10">Create user</h1>
+            <form action="/create" method="post">
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="text" placeholder="username" name="username"/>
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="email" placeholder="email" name="email"/>
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="password" name="password"/>
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="number" placeholder="age" name="age"/>
+                <input class ="text-white block mt-3 w-full px-3 py-2 rounded-md bg-sky-950 hover:text-black hover:bg-sky-200 cursor-pointer font-semibold border-2 border-zinc-700 outline-none " type="submit" value="create user"/>
+            </form>
+        </div>
+    </div> -->
+    <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-sky-100 py-6 sm:py-12">
+        <div class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
+          <div class="mx-auto max-w-md">
+            <h1 class="text-3xl mx-16 mb-4">Create user</h1>
+            <form action="/create" method="post">
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="text" placeholder="username" name="username"/>
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="email" placeholder="email" name="email"/>
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="password" name="password"/>
+                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="number" placeholder="age" name="age"/>
+                <input class ="text-white block mt-3 w-full px-3 py-2 rounded-md bg-sky-950 hover:text-black hover:bg-sky-200 cursor-pointer font-semibold border-2 border-zinc-700 outline-none " type="submit" value="create user"/>
+            </form>
+            
+              </div>
+              <a class="m-32 text-blue-700" href="/login">Login</a>
+            </div>
+          </div>
+</body>
+</html>
