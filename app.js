@@ -68,5 +68,5 @@ app.get('/logout',(req,res)=>
 })
 app.listen(3001,()=>
 {
-    console.log('server listening at port 3000')
+    console.log('server listening at port 3001')
 })
