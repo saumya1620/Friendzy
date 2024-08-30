@@ -9,36 +9,69 @@ app.use(cookieParser())
 app.set('view engine','ejs')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-
+const secret = 'your_jwt_secret_key'
 const usermodel = require('./models/user')
 
+function verifyToken(req, res, next) {
+    const token = req.cookies.token;
+    if (!token) {
+        return res.redirect('/login');
+    }
+
+    jwt.verify(token, secret, (err, decoded) => {
+        if (err) {
+            return res.redirect('/login');
+        }
+        req.user = decoded; 
+        next();
+    });
+}
 
 app.get('/',(req,res)=>
 {
     res.render('index')
 })
-app.post('/create',(req,res)=>
+app.post('/create',async (req,res)=>
 {
-    let {username,email,password,age}=req.body
+    let { username, email, phonenumber, password, confirmPassword, gender, date } = req.body;
+    let usercreated = await usermodel.findOne({username})
+    
+    if(usercreated) 
+    {
+        return res.redirect('/?exists=true'); 
+    }
+    if(password.length<6)
+    {
+        return res.redirect('/?length=true');
+    }
+    if(phonenumber.length<10)
+    {
+        return res.redirect('/?phone=true')
+    }
     const saltrounds = 10
     bcrypt.genSalt(saltrounds,(err,salt)=>
     {
         bcrypt.hash(password,salt,async (err,hash)=>
         {
-            let usercreated = await usermodel.create ({
+            usercreated = await usermodel.create ({
                 username,
                 email,
+                phonenumber,
                 password:hash,
-                age
+                gender,
+                date
+
             })
             console.log(usercreated)
-            res.redirect('/?welcome=true'); 
-            res.render('/')
+            return res.redirect('/login?welcome=true')
+            
+            
         })
-        
+         
     })
     
 })
+
 
 app.get('/login',(req,res)=>
 {
@@ -48,25 +81,37 @@ app.get('/login',(req,res)=>
 app.post('/login', async (req,res) => {
     let user = await usermodel.findOne({username: req.body.username})
     console.log(user)
-    if(!user) res.send('Email or Password is Incorrect')
+    if(!user) res.redirect('/?incorrect=true');
 
     bcrypt.compare(req.body.password, user.password, (err, result)=>{
         if(result){
-            let token = jwt.sign({email: user.email}, "secretKey")
-            res.cookie('token', token)
-            res.send('Login Successfull')
+            // let token = jwt.sign({email: user.email}, "secretKey")
+            let token = jwt.sign({ id: user._id, username: user.username }, secret);
+            res.cookie('token', token, { httpOnly: true})
+            
+            res.status(200).render('profile',{user})
         }
-        else res.send('Email or Paaword is Incorrect')
+        else
+        {
+            res.redirect('/?incorrect=true'); 
+
+        }
     })
 })
+app.get('/profile',verifyToken, async (req,res)=>
+{
+    const user = await usermodel.findById(req.user.id);
+    res.render('profile', { user });
 
+})
 
 app.get('/logout',(req,res)=>
 {
-    res.cookie('token','')
-    res.redirect('/')
+    // res.cookie('token','')
+    res.clearCookie('token');
+    res.redirect('/login')
 })
 app.listen(3001,()=>
 {
-    console.log('server listening at port 3001')
-})
+    console.log('server listening at port 3000')
+}) 
