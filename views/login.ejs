@@ -5,20 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>login page</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Check if the URL has the 'welcome' query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('incorrect') === 'true') {
+          alert("Email or Password Incorrect");
+      }
+      function togglePasswordVisibility(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.src = "/images/eye.png"; // Update to your show password icon
+            } else {
+                passwordInput.type = "password";
+                icon.src = "/images/hidden.png"; // Update to your hide password icon
+            }
+        }
+  </script>
 </head>
 <body>
     <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-sky-100 py-6 sm:py-12">
         <div class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
           <div class="mx-auto max-w-md">
-            <h1 class="text-3xl mx-16 mb-4">LOGIN</h1>
+            <img src="/images/Friendzy (1).png" class="w-full h-24">
             <form action="/login" method="post">
                 <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="text" placeholder="username" name="username"/>
-                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="password" name="password"/>
+                <div class="relative mt-3">
+                  <input id="password" class="block w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="Password" name="password" required/>
+                  <img id="passwordToggleIcon" src="/images/hidden.png" class="absolute right-3 top-3 w-6 h-6 cursor-pointer" onclick="togglePasswordVisibility('password', 'passwordToggleIcon')"/>
+              </div>
+                <!-- <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="password" name="password"/> -->
                 <input class ="text-white block mt-3 w-full px-3 py-2 rounded-md bg-sky-950 hover:text-black hover:bg-sky-200 cursor-pointer font-semibold border-2 border-zinc-700 outline-none " type="submit" value="Login"/>
             </form>
             
               </div>
-              <a class="m-20 text-blue-700" href="/">Create an account</a>
+              <p class="mt-2 ml-8 mr-8">Do not have an Acount <a class="text-blue-700" href="/">Create Here</a></p>
             </div>
           </div>
 </body>
