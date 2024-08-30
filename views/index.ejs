@@ -1,44 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>user auth</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        if (urlParams.get('welcome') === 'true') {
-            alert("Welcome to Friendzy!!");
-        }
-        if (urlParams.get('exists') === 'true') {
-            alert("Username already exists!! Please choose a different one.");
-        }
+      const urlParams = new URLSearchParams(window.location.search);
+
+      if (urlParams.get("welcome") === "true") {
+        alert("Welcome to Friendzy!!");
+      }
+      if (urlParams.get("exists") === "true") {
+        alert("Username already exists!! Please choose a different one.");
+      }
     </script>
     <script>
-        function togglePasswordVisibility(inputId, iconId) {
-            const passwordInput = document.getElementById(inputId);
-            const icon = document.getElementById(iconId);
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-                icon.src = "/images/eye.png"; // Update to your show password icon
-            } else {
-                passwordInput.type = "password";
-                icon.src = "/images/hidden.png"; // Update to your hide password icon
-            }
+      function togglePasswordVisibility(inputId, iconId) {
+        const passwordInput = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          icon.src = "/images/eye.png"; // Update to your show password icon
+        } else {
+          passwordInput.type = "password";
+          icon.src = "/images/hidden.png"; // Update to your hide password icon
         }
-        function validatePasswords() {
-            const password = document.getElementById("password").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
-            if (password !== confirmPassword) {
-                alert("Passwords do not match!");
-            }
+      }
+      function validatePasswords() {
+        const password = document.getElementById("password").value;
+        const confirmPassword =
+          document.getElementById("confirmPassword").value;
+        if (password !== confirmPassword) {
+          alert("Passwords do not match!");
         }
-        
-
+      }
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <!-- <div class="w-full h-screen bg-sky-200 text-black">
         <div class="p-20 w-1/2">
             <h1 class="text-4xl my-10">Create user</h1>
@@ -51,46 +50,117 @@
             </form>
         </div>
     </div> -->
-    
-    <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-sky-100 py-6 sm:py-12">
-        
-        <div class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
-          <div class="mx-auto max-w-md">
-            
-            
-            <img src="/images/Friendzy (1).png" class="w-full h-24">
-            <form action="/create" method="post">
-                <div>
-                    <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="text" placeholder="username" name="username" required/>
-                </div>
-                
-                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="email" placeholder="email" name="email" required/>
-                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="number" placeholder="phone number" name="phonenumber" required/>
-                <!-- <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="password" name="password"/> -->
-                <div class="relative mt-3">
-                    <input id="password" class="block w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="Password" name="password" required/>
-                    <img id="passwordToggleIcon" src="/images/hidden.png" class="absolute right-3 top-3 w-6 h-6 cursor-pointer" onclick="togglePasswordVisibility('password', 'passwordToggleIcon')"/>
-                </div>
 
-                <!-- Confirm Password field with show/hide icon -->
-                <div class="relative mt-3">
-                    <input id="confirmPassword" class="block w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="Confirm Password" name="confirmPassword" required/>
-                    <img id="confirmPasswordToggleIcon" src="/images/hidden.png" class="absolute right-3 top-3 w-6 h-6 cursor-pointer" onclick="togglePasswordVisibility('confirmPassword', 'confirmPasswordToggleIcon')"/>
-                </div>
-                <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="text" placeholder="Gender" name="gender"/>
-                <input class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="date" name="date" placeholder="Enter your date of birth (dd-mm-yyyy)" value="" min="1997-01-01" max="2030-12-31">
-                <input class ="text-white block mt-3 w-full px-3 py-2 rounded-md bg-sky-950 hover:text-black hover:bg-sky-200 cursor-pointer font-semibold border-2 border-zinc-700 outline-none " type="submit" value="Set Username and Profile"/>
-                
-            </form>
-            
-              </div>
-              <div>
-              
-                <p class="ml-8 mr-8 mt-2">Already Have an Account <a class="text-blue-700" href="/login">Login Here</a></p>
+    <div
+      class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-sky-100 py-6 sm:py-12"
+    >
+      <div
+        class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10"
+      >
+        <div class="mx-auto max-w-md">
+          <img src="/images/Friendzy (1).png" class="w-full h-24" />
+          <form action="/create" method="post">
+            <div>
+              <input
+                class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+                type="text"
+                placeholder="username"
+                name="username"
+                required
+              />
             </div>
 
-              
+            <input
+              class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+              type="email"
+              placeholder="email"
+              name="email"
+              required
+            />
+            <input
+              class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+              type="text"
+              placeholder="phone number"
+              name="phonenumber"
+              required
+              pattern="\d{10}"
+              maxlength="10"
+              title="Please enter a valid 10-digit phone number"
+            />
+            <!-- <input class ="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none" type="password" placeholder="password" name="password"/> -->
+            <div class="relative mt-3">
+              <input
+                id="password"
+                class="block w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+                type="password"
+                placeholder="Password"
+                name="password"
+                required
+              />
+              <img
+                id="passwordToggleIcon"
+                src="/images/hidden.png"
+                class="absolute right-3 top-3 w-6 h-6 cursor-pointer"
+                onclick="togglePasswordVisibility('password', 'passwordToggleIcon')"
+              />
             </div>
-          </div>
-</body>
+
+            <!-- Confirm Password field with show/hide icon -->
+            <div class="relative mt-3">
+              <input
+                id="confirmPassword"
+                class="block w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+                type="password"
+                placeholder="Confirm Password"
+                name="confirmPassword"
+                required
+              />
+              <img
+                id="confirmPasswordToggleIcon"
+                src="/images/hidden.png"
+                class="absolute right-3 top-3 w-6 h-6 cursor-pointer"
+                onclick="togglePasswordVisibility('confirmPassword', 'confirmPasswordToggleIcon')"
+              />
+            </div>
+            <!-- <input
+              class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+              type="text"
+              placeholder="Gender"
+              name="gender"
+            /> -->
+            <select
+              class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+              name="gender"
+              required
+            >
+              <option value="" disabled selected>Select your gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+            <input
+              class="block mt-3 w-full px-3 py-2 rounded-md bg-transparent border-2 border-zinc-700 outline-none"
+              type="date"
+              name="date"
+              placeholder="Enter your date of birth (dd-mm-yyyy)"
+              value=""
+              min="1997-01-01"
+              max="2030-12-31"
+            />
+            <input
+              class="text-white block mt-3 w-full px-3 py-2 rounded-md bg-sky-950 hover:text-black hover:bg-sky-200 cursor-pointer font-semibold border-2 border-zinc-700 outline-none"
+              type="submit"
+              value="Set Username and Profile"
+            />
+          </form>
+        </div>
+        <div>
+          <p class="ml-8 mr-8 mt-2">
+            Already Have an Account
+            <a class="text-blue-700" href="/login">Login Here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>

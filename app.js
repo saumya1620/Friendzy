@@ -1,16 +1,19 @@
 const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const usermodel = require('./models/user')
+
 const app = express()
+const secret = 'your_jwt_secret_key'
+
+//Middleware
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(express.static(path.join(__dirname,'public')))
 app.use(cookieParser())
 app.set('view engine','ejs')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const secret = 'your_jwt_secret_key'
-const usermodel = require('./models/user')
 
 function verifyToken(req, res, next) {
     const token = req.cookies.token;
@@ -31,6 +34,18 @@ app.get('/',(req,res)=>
 {
     res.render('index')
 })
+
+app.get('/profile', verifyToken, async (req, res) => {
+    const user = await usermodel.findById(req.user.id);
+    const sidebarLinks = [
+        { label: 'Home', route: '/', imgURL: 'public/images/Friendzy.png' },
+        { label: 'Profile', route: '/profile', imgURL: '/public/images/user.png' },
+        // Add more links as needed
+    ];
+    res.render('profile', { user, sidebarLinks, pathname: '/profile' });
+});
+
+
 app.post('/create',async (req,res)=>
 {
     let { username, email, phonenumber, password, confirmPassword, gender, date } = req.body;
@@ -113,5 +128,5 @@ app.get('/logout',(req,res)=>
 })
 app.listen(3001,()=>
 {
-    console.log('server listening at port 3000')
+    console.log('server listening at port 3001')
 }) 
