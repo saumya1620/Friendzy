@@ -3,7 +3,7 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const usermodel = require('./models/user')
+const appModels = require('./models');
 
 const app = express()
 const secret = 'your_jwt_secret_key'
@@ -30,13 +30,26 @@ function verifyToken(req, res, next) {
     });
 }
 
-app.get('/',(req,res)=>
+app.get('/', verifyToken,async(req,res)=>
 {
-    res.render('index')
+    const suggestedUsers = [
+        { name: 'suman', avatar: '/path/to/avatar1.png' },
+        { name: 'Kaji', avatar: '/path/to/avatar2.png' },
+        // Add more users as needed
+      ];
+      const posts = await appModels.posts.find({author: req.user.id});
+
+      res.render('index', {
+        user: req.user, 
+        suggestedUsers: suggestedUsers,
+        posts : posts
+    });
+
+    
 })
 
 app.get('/profile', verifyToken, async (req, res) => {
-    const user = await usermodel.findById(req.user.id);
+    const user = await appModels.users.findById(req.user.id);
     const sidebarLinks = [
         { label: 'Home', route: '/', imgURL: 'public/images/Friendzy.png' },
         { label: 'Profile', route: '/profile', imgURL: '/public/images/user.png' },
@@ -49,7 +62,7 @@ app.get('/profile', verifyToken, async (req, res) => {
 app.post('/create',async (req,res)=>
 {
     let { username, email, phonenumber, password, confirmPassword, gender, date } = req.body;
-    let usercreated = await usermodel.findOne({username})
+    let usercreated = await appModels.users.findOne({username})
     
     if(usercreated) 
     {
@@ -68,7 +81,7 @@ app.post('/create',async (req,res)=>
     {
         bcrypt.hash(password,salt,async (err,hash)=>
         {
-            usercreated = await usermodel.create ({
+            usercreated = await appModels.users.create ({
                 username,
                 email,
                 phonenumber,
@@ -94,7 +107,7 @@ app.get('/login',(req,res)=>
 })
 
 app.post('/login', async (req,res) => {
-    let user = await usermodel.findOne({username: req.body.username})
+    let user = await appModels.users.findOne({username: req.body.username})
     console.log(user)
     if(!user) res.redirect('/?incorrect=true');
 
@@ -104,7 +117,8 @@ app.post('/login', async (req,res) => {
             let token = jwt.sign({ id: user._id, username: user.username }, secret);
             res.cookie('token', token, { httpOnly: true})
             
-            res.status(200).render('profile',{user})
+            // res.status(200).render('profile',{user})
+            res.redirect('/');
         }
         else
         {
@@ -113,13 +127,28 @@ app.post('/login', async (req,res) => {
         }
     })
 })
-app.get('/profile',verifyToken, async (req,res)=>
-{
-    const user = await usermodel.findById(req.user.id);
-    res.render('profile', { user });
-
+app.get('/signup',(req,res)=>{
+    res.render('signup');
 })
+// app.get('/profile',verifyToken, async (req,res)=>
+// {
+//     const user = await appModels.users.findById(req.user.id);
+//     res.render('profile', { user });
 
+// })
+
+app.post('/posts',verifyToken, async (req,res)=>{
+    console.log("Hello x", req.body.post);
+    const post = await appModels.posts.create({
+    author: req.user.id,
+    content: req.body.post,
+    createdAt: new Date(),
+    updatedAt: new Date()
+    });
+
+    // res.send("Posted");
+    res.redirect("/");
+})
 app.get('/logout',(req,res)=>
 {
     // res.cookie('token','')
