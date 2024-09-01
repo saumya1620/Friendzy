@@ -1,4 +1,4 @@
-<div class="bg-gray-100 mb-5">
+<!-- <div class="bg-gray-100 mb-5">
   <div class="bg-white p-2 rounded-lg shadow-md">
     <div class="flex items-center bg-white p-4 rounded-lg shadow">
       <img
@@ -15,6 +15,105 @@
       </div>
 
       <i class="fa-solid fa-share"></i>
+    </div>
+  </div>
+</div> -->
+<div class="bg-gray-100 mb-5">
+  <div class="bg-white p-2 rounded-lg shadow-md">
+    <!-- Post Header -->
+    <div class="flex items-center bg-white p-4">
+      <img
+        src="https://via.placeholder.com/50"
+        alt="User Avatar"
+        class="w-10 h-10 rounded-full"
+      />
+      <div class="ml-4">
+        <p class="text-gray-800 font-semibold"><%= user.username %></p>
+      </div>
+    </div>
+
+    <!-- Post Content -->
+    <div class="p-4">
+      <div><%= post.content %></div>
+      <% if (post.imagePath) { %>
+      <img
+        src="<%= post.imagePath %>"
+        alt="Post Image"
+        class="mt-2 w-full h-auto rounded-lg"
+      />
+      <% } %> <% if (post.videoPath) { %>
+      <video controls class="mt-2 w-full h-auto rounded-lg">
+        <source src="<%= post.videoPath %>" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+      <% } %>
+    </div>
+
+    <!-- Post Actions -->
+    <div class="flex justify-between p-4">
+      <div class="flex gap-4">
+        <form action="/posts/<%= post._id %>/like" method="POST" class="inline">
+          <% if (post.likes && post.likes.includes(user._id)) { %>
+          <button type="submit" class="text-red-500">
+            <i class="fa-solid fa-heart"></i> Unlike (<%= (post.likes ||
+            []).length %>)
+          </button>
+          <% } else { %>
+          <button type="submit" class="text-gray-500">
+            <i class="fa-regular fa-heart"></i> Like (<%= (post.likes ||
+            []).length %>)
+          </button>
+          <% } %>
+        </form>
+        <a href="#comments" class="text-gray-500 hover:underline">
+          <i class="fa-regular fa-comment"></i> Comments
+        </a>
+      </div>
+      <i class="fa-solid fa-share text-gray-500"></i>
+    </div>
+
+    <!-- Display Comments -->
+    <div id="comments" class="comments mt-4">
+      <% if (post.comments && post.comments.length > 0) { %> <%
+      post.comments.forEach(comment => { %>
+      <div class="comment mb-3 p-2 bg-gray-50 rounded-lg">
+        <p><%= comment.content %></p>
+        <form action="/comments/<%= comment._id %>/like" method="POST">
+          <% if (comment.likes && comment.likes.includes(user._id)) { %>
+          <button type="submit" class="text-red-500">
+            <i class="fa-solid fa-heart"></i> Unlike (<%= (comment.likes ||
+            []).length %>)
+          </button>
+          <% } else { %>
+          <button type="submit" class="text-gray-500">
+            <i class="fa-regular fa-heart"></i> Like (<%= (comment.likes ||
+            []).length %>)
+          </button>
+          <% } %>
+        </form>
+      </div>
+      <% }); %> <% } else { %>
+      <p>No comments yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Add Comment Form -->
+    <div class="mt-4">
+      <form action="/posts/<%= post._id %>/comments" method="POST">
+        <textarea
+          name="commentContent"
+          rows="3"
+          class="w-full p-2 border border-gray-300 rounded-lg"
+          placeholder="Add a comment..."
+          required
+        ></textarea>
+        <button
+          type="submit"
+          class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg"
+        >
+          Post Comment
+        </button>
+      </form>
     </div>
   </div>
 </div>

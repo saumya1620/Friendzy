@@ -3,46 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>user auth</title>
+    <title>User Auth</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="path/to/font-awesome/css/font-awesome.min.css"
+    />
   </head>
   <body>
     <div class="flex">
       <!--NavBar-->
-    <nav class="w-full">
-      <%- include('navbar', { user: user }) %>
-    </nav>
+      <nav class="w-full"><%- include('navbar', { user: user }) %></nav>
     </div>
-          
-  </div>
-    <div class="flex justify-between">
 
+    <div class="flex justify-between">
       <!-- Left Sidebar -->
       <div class="w-1/4 p-4">
-        <div  class="mb-5"><%- include('notifications') %> </div>
+        <div class="mb-5"><%- include('notifications') %></div>
         <%- include('explore') %>
       </div>
 
       <!-- Middle Content -->
       <div class="w-2/4 mx-4 p-4">
-        <div class="mb-5">
-          <%- include('note') %>
-        </div> 
-        
-        
-        <div><% posts.forEach(function(post){ %> 
-          <%- include('post', {post: post}) %> 
-          <% });%></div>
+        <div class="mb-5"><%- include('note') %></div>
+        <div>
+          <% posts.forEach(function(post){ %> <%- include('post', { post: post
+          }) %> <% }); %>
         </div>
+      </div>
 
       <!-- Right Sidebar -->
       <div class="w-1/4 p-4">
-
-        <div  class="mb-5"><%- include('sideSuggestions') %> </div>
-  
-          <%- include('suggestedForYou', {
-            suggestions: suggestedUsers }) %>
+        <div class="mb-5"><%- include('sideSuggestions') %></div>
+        <div class="mb-5">
+          <%- include('suggestedForYou', { suggestions: suggestedUsers }) %>
+        </div>
       </div>
     </div>
+
+    <!-- Last Content -->
+    <div class="w-full"><%- include('footer') %></div>
   </body>
 </html>

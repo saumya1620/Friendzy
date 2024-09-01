@@ -8,39 +8,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-100">
-    <div class="bg-white p-2 rounded-lg shadow-md p-4">
+    <div class="bg-white p-4 rounded-lg shadow-md">
       <h2 class="text-xl font-semibold mb-4">Explore</h2>
-      <div class="space-y-4">
-        <!-- Explore item -->
-        <div class="flex items-center bg-white p-4 rounded-lg shadow">
-          <img
-            src="https://via.placeholder.com/50"
-            alt="Explore Image"
-            class="w-10 h-10 rounded-full"
-          />
-          <div class="ml-4">
-            <p class="text-gray-700">Discover new content</p>
-            <p class="text-sm text-gray-500">
-              Check out the latest posts and trends
-            </p>
-          </div>
-        </div>
-        <!-- Repeat this block for more explore items -->
-        <div class="flex items-center bg-white p-4 rounded-lg shadow">
-          <img
-            src="https://via.placeholder.com/50"
-            alt="Explore Image"
-            class="w-10 h-10 rounded-full"
-          />
-          <div class="ml-4">
-            <p class="text-gray-700">Explore user profiles</p>
-            <p class="text-sm text-gray-500">
-              Find new friends and connections
-            </p>
-          </div>
-        </div>
-        <!-- Add more explore items as needed -->
+      <div id="image-grid" class="grid grid-cols-3 gap-4">
+        <!-- Images will be dynamically inserted here -->
       </div>
     </div>
+    <script>
+      // Fetch images from the API and insert them into the grid
+      async function fetchImages() {
+        try {
+          const response = await fetch("/api/explore-images");
+          let images = await response.json();
+
+          // Limit to 9 images
+          images = images.slice(0, 9);
+
+          const gridContainer = document.getElementById("image-grid");
+          gridContainer.innerHTML = ""; // Clear previous content
+
+          images.forEach((image) => {
+            const imgElement = document.createElement("img");
+            imgElement.src = image.urls.small; // or image.urls.regular for larger images
+            imgElement.alt = image.alt_description;
+            imgElement.className = "w-full h-40 object-cover rounded-lg"; // Adjust size and aspect ratio
+
+            gridContainer.appendChild(imgElement);
+          });
+        } catch (error) {
+          console.error("Error fetching images:", error);
+        }
+      }
+
+      fetchImages();
+    </script>
   </body>
 </html>

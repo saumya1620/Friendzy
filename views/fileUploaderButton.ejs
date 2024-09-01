@@ -1,7 +1,7 @@
 <style>
   .custom-file .file-preview {
     display: none;
-    width: 155px;
+    /* width: 155px; */
     border: 2px dashed #333;
     margin-bottom: 20px;
   }
@@ -15,13 +15,17 @@
     width: 0;
     overflow: hidden;
   }
+  .custom-file .attach-btn {
+    position: absolute;
+    bottom: 0px;
+  }
 </style>
 <div class="custom-file">
   <div class="file-preview" id="file-preview-<%=name%>"></div>
   <input type="file" id="id-<%=name%>" name="<%=name%>" accept="<%=type%>/*" />
   <label
     for="id-<%=name%>"
-    class="p-2 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-200"
+    class="attach-btn p-2 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-200 left-[<%= pos * 2 %>rem]"
   >
     <i class="<%=icon%>"></i>
   </label>
