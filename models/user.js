@@ -61,4 +61,3 @@ const usermodel = mongoose.model('user',userschema)
 module.exports = usermodel;
 
 // export default models('user',userschema)
-
