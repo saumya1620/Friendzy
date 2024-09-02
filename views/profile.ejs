@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body class="bg-blue-100">
+    <nav class="bg-sky-950 p-4 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="text-white text-xl font-semibold">
+            <a href="/">Friendzy</a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="flex-grow mx-4 lg:mx-40">
+            <form action="/search" method="get" class="relative">
+                <button type="submit" class="absolute left-2 top-1/2 transform -translate-y-1/2">
+                    <img src="/images/search (1).png" alt="Search" class="h-5 w-5 text-gray-500" />
+                </button>
+                <input type="text" name="query" placeholder="Search..."
+                    class="w-full lg:w-1/2 pl-10 py-2 rounded-md bg-white border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            </form>
+        </div>
+
+        <!-- Notification and Message Icons -->
+        <div class="flex items-center space-x-4">
+            <button class="relative">
+                <i class="fas fa-bell fa-2x text-white mr-2"></i>
+            </button>
+            <button class="relative">
+                <a href="/conversations"><i class="fas fa-envelope fa-2x text-white mr-4"></i></a>
+            </button>
+        </div>
+
+        <!-- Profile and Hamburger Menu -->
+        <div class="relative flex items-center space-x-4">
+            <!-- Profile (Visible on larger screens) -->
+            <% if (user) { %>
+                <div class="hidden lg:flex items-center">
+                    <img src="<%= user.profilePicture %>" alt="Profile Picture"
+                        class="w-10 h-10 rounded-full mr-2">
+                    <a href="/about" class="text-white font-semibold"><%= user.username %></a>
+                </div>
+                <a href="/logout" class="hidden lg:block text-white">Logout</a>
+            <% } %>
+
+            <!-- Hamburger Menu (Visible on smaller screens) -->
+            <div class="lg:hidden">
+                <button id="settingsMenuButton" class="text-white">
+                    <i class="fas fa-bars fa-2x"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div id="settingsMenu" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg hidden lg:hidden">
+            <% if (user) { %>
+                <div class="flex items-center p-4 border-b border-gray-200">
+                    <img src="<%= user.profilePicture %>" alt="Profile Picture"
+                        class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <a href="/about" class="text-gray-800 font-semibold"><%= user.username %></a>
+                    </div>
+                </div>
+                <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</a>
+            <% } else { %>
+                <a href="/login" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Login</a>
+            <% } %>
+        </div>
+    </nav>
+    <div class="flex justify-between">
+        <div class="w-1/4 p-4 mx-4">
+
+    <div class="bg-white p-2 rounded-lg shadow-md">
+        <div class="p-4">
+          <h2 class="text-xl font-semibold mb-5">Notifications</h2>
+          <div class="space-y-4">
+            <!-- Notification item -->
+            <div class="flex items-center bg-white p-4 rounded-lg shadow">
+              <img
+                src="imgages/user.png"
+                alt="User Avatar"
+                class="w-10 h-10 rounded-full"
+              />
+              <div class="ml-4">
+                <p class="text-gray-700">
+                  <strong>Madan</strong> liked your post
+                </p>
+                <p class="text-sm text-gray-500">2 minutes ago</p>
+              </div>
+            </div>
+            <!-- Repeat this block for more notifications -->
+            <div class="flex items-center bg-white p-4 rounded-lg shadow">
+              <img
+                src="images/user.png"
+                alt="User Avatar"
+                class="w-10 h-10 rounded-full"
+              />
+              <div class="ml-4">
+                <p class="text-gray-700">
+                  <strong>Suman</strong> started following you
+                </p>
+                <p class="text-sm text-gray-500">5 minutes ago</p>
+              </div>
+            </div>
+            <!-- Add more notifications as needed -->
+          </div>
+        </div>
+      </div>
+      <div class="bg-white p-4 w-full rounded-lg shadow-md mt-4">
+        <div class="flex justify-between">
+        <h2 class="text-xl font-semibold mb-4">Explore</h2>
+        <a href="/exploremore" class="text-gray-500 hover:underline">
+         See More
+        </a>
+        </div>
+
+        <div id="image-grid" class="grid grid-cols-3 gap-4">
+          <!-- Images will be dynamically inserted here -->
+        </div>
+      </div>
+      <script>
+        // Fetch images from the API and insert them into the grid
+        async function fetchImages() {
+          try {
+            const response = await fetch("/api/explore-images");
+            let images = await response.json();
+  
+            // Limit to 9 images
+            images = images.slice(0, 9);
+  
+            const gridContainer = document.getElementById("image-grid");
+            gridContainer.innerHTML = ""; // Clear previous content
+  
+            images.forEach((image) => {
+              const imgElement = document.createElement("img");
+              imgElement.src = image.urls.small; // or image.urls.regular for larger images
+              imgElement.alt = image.alt_description;
+              imgElement.className = "w-full h-32 object-cover rounded-lg"; // Adjust size and aspect ratio
+  
+              gridContainer.appendChild(imgElement);
+            });
+          } catch (error) {
+            console.error("Error fetching images:", error);
+          }
+        }
+  
+        fetchImages();
+        </script>
+      </div>
+      
+        <div class="w-2/4 p-4 mx-4">
+          <div class="mb-5">
+              <div class="bg-white p-4 rounded-lg shadow-md">
+                  <form action="/posts" method="post">
+                    <textarea
+                      class="w-full p-2 rounded-md border border-gray-300 outline-none"
+                      placeholder="Write your real thought..."
+                      name="post"
+                    ></textarea>
+                    <div class="flex justify-between items-center mt-3">
+                      <div class="flex space-x-3">
+                        <%- include('fileUploaderButton', {type:"image",name:"post-img",
+                        icon:"fa-regular fa-image"}) %> <%- include('fileUploaderButton',
+                        {type:"video",name:"post-video", icon:"fa-solid fa-video"}) %>
+                      </div>
+                      <button class="bg-blue-500 text-white py-1 px-3 rounded-md">
+                        Post
+                      </button>
+                    </div>
+                  </form>
+                </div>
+  
+          </div>
+          <div class="bg-gray-100 mb-5">
+              <% if (posts.length > 0) { %>
+                  <% posts.forEach(post => { %>
+                      <div class="bg-white p-2 rounded-lg shadow-md mb-4">
+                          <div class="flex items-center bg-white p-4 rounded-lg shadow">
+                              <img src="<%= post.author.profilePicture ? post.author.profilePicture : '/images/user.png' %>" alt="User Avatar" class="w-10 h-10 rounded-full" />
+                          </div>
+                          <div><%= post.content %></div>
+                          <div class="flex justify-between mt-3">
+                              <div class="flex gap-4">
+                                  <i class="fa-regular fa-heart"></i>
+                                  <i class="fa-regular fa-comment"></i>
+                              </div>
+                              <i class="fa-solid fa-share"></i>
+                          </div>
+                      </div>
+                  <% }) %>
+              <% } else { %>
+                  <div class="bg-white p-2 rounded-lg shadow-md mb-4">
+                      <div class="text-gray-600 p-4">No posts available</div>
+                  </div>
+              <% } %>
+          </div>
+  
+      </div>      
+      <div class="w-1/4 p-4">
+        <div class="bg-white p-4 rounded-lg shadow-md max-w-sm mx-auto mb-5">
+          <h3 class="text-lg font-semibold mb-4">Courses</h3>
+          <div class="flex flex-col space-y-4">
+            <a href="https://codecademy.com" class="block">
+              <div class="w-full h-32 overflow-hidden rounded-md">
+                <img
+                  src="/images/codeacademy.png"
+                  alt="CodeAcademy"
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            </a>
+            <a
+              href="https://www.coursera.org/courseraplus/special/india-cplus-promo?adgroupid=155702724684&adposition=&campaignid=20590309416&creativeid=711559928554&device=c&devicemodel=&gad_source=1&gclid=Cj0KCQjw_sq2BhCUARIsAIVqmQt-X5kkL8fCjBWKu2b7umM-pKHZ3ASN5DT-KWgwyliCHtmV47MLT4gaAqzOEALw_wcB&hide_mobile_promo&keyword=coursera+website&matchtype=e&network=g&utm_campaign=b2c_india_coursera-plus_coursera_ftcof_subscription_arte_sep-23_dr_sem_rsa_gads_lg-all&utm_medium=sem&utm_source=gg"
+              class="block"
+            >
+              <div class="w-full h-32 overflow-hidden rounded-md">
+                <img
+                  src="/images/coursera.png"
+                  alt="w3schools"
+                  class="w-full h-full object-fit"
+                />
+              </div>
+            </a>
+          </div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow-md max-w-sm  mx-auto">
+            <div class="">
+                <h2 class="text-xl font-bold mb-2">User Suggestions</h2>
+                <ul>
+                    <% if (suggestions && suggestions.length > 0) { %>
+                        <% suggestions.forEach(user => { %>
+                            <li class=" justify-between items-center mt-2 text-gray-700">
+                                <div class="flex  justify-between">
+                                    <img src="<%= user.profilePicture %>" alt="Profile Picture" class="w-10 h-10 rounded-full mr-3">
+                                    <span><%= user.username %></span>
+                               
+                                <form action="/send-request" method="post">
+                                    <input type="hidden" name="suggestionId" value="<%= user._id %>">
+                                    <button type="submit" class=" h-10 w-10  rounded"><img src="images/add-user.png" alt=""></button>
+                                </form>
+                                </div>
+                            </li>
+                        <% }) %>
+                    <% } else { %>
+                        <li class="text-gray-600">No suggestions available</li>
+                    <% } %>
+                </ul>
+              
+        </div>
+
+      </div>
+      
+      
+      </div>
+
+    <script>
+        // JavaScript for toggling the settings menu
+        document.getElementById('settingsMenuButton').addEventListener('click', () => {
+            const menu = document.getElementById('settingsMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Close the menu if clicking outside
+        document.addEventListener('click', (event) => {
+            const isClickInside = document.getElementById('settingsMenu').contains(event.target);
+            const isButtonClick = document.getElementById('settingsMenuButton').contains(event.target);
+            if (!isClickInside && !isButtonClick) {
+                document.getElementById('settingsMenu').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

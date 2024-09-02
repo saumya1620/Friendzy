@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+        // Script to handle search functionality
+        function searchUsers() {
+            const query = document.getElementById('searchInput').value;
+            window.location.href = `/conversations?search=${query}`;
+        }
+    </script>
+</head>
+<body class="bg-sky-100">
+    <nav class="bg-sky-950 p-4 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="text-white text-xl font-semibold">
+            <a href="/">Friendzy</a>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="flex-grow mx-40">
+            <form action="/search" method="get" class="relative">
+                <button type="submit" class="absolute left-2 top-1/2 transform -translate-y-1/2">
+                    <img src="/images/search (1).png" alt="Search" class="h-5 w-5 text-gray-500"/>
+                </button>
+                <input type="text" name="query" placeholder="Search..." class="w-1/2 pl-10 py-2 rounded-md bg-white border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            </form>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <button class="relative">
+                <i class="fas fa-bell fa-2x text-white mr-2"></i>
+                
+            </button>
+            <button class="relative">
+                <a href="/conversations"><i class="fas fa-envelope fa-2x text-white"></i></a>
+                
+            </button>
+        </div>
+        
+        <!-- Hamburger Menu -->
+        <div class="relative lg:hidden">
+            <button id="settingsMenuButton" class="text-white">
+                <i class="fas fa-bars fa-2x"></i>
+            </button>
+            
+            <!-- Dropdown Menu -->
+            <div id="settingsMenu" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg hidden">
+                <% if (user) { %>
+                <div class="flex items-center p-4 border-b border-gray-200">
+                    <img src="<%= user.profilePicture %>" alt="Profile Picture" class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <a href="/about" class="text-gray-800 font-semibold"><%= user.username %></a>
+                    </div>
+                </div>
+                <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</a>
+                <% } else { %>
+                <a href="/login" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Login</a>
+                <% } %>
+            </div>
+        </div>
+        <% if (user) { %>
+            <div class="flex items-center">
+                <img src="<%= user.profilePicture %>" alt="Profile Picture" class="w-10 h-10 rounded-full mr-5 ml-20">
+                <div>
+                    <a href="/about" class="text-white font-semibold mr-5"><%= user.username %></a>
+                </div>
+            </div>
+            <a href="/logout" class="ml-4 text-white">Logout</a>
+            <% } else { %>
+            <a href="/login" class="text-white">Login</a>
+            <% } %>
+    </nav>
+
+    <div class="flex justify-between mx-4 p-4">
+        <div class="w-full p-4 mx-4">
+            <!-- Search Bar -->
+            <form action="/searchuserchat" method="get" class="mb-4">
+                <input type="text" name="query" value="<%= query %>" placeholder="Search users..." class="p-2 rounded border border-gray-300" />
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Search</button>
+            </form>
+
+            <!-- Conversations List -->
+            <div>
+                <% if (conversations.length > 0) { %>
+                    <% conversations.forEach(conversation => { %>
+                        <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+                            <h2 class="text-xl font-bold">Conversation with <%= conversation.participants.filter(p => p._id.toString() !== currentUser._id.toString())[0].username %></h2>
+                            <a href="/message/<%= conversation._id %>" class="text-blue-500">Open Chat</a>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p>No conversations yet</p>
+                    <a href="/start-new-conversation" class="bg-blue-500 text-white px-4 py-2 rounded flex justify-center mt-4">Start a New Conversation</a>
+                <% } %>
+            </div>
+
+            <!-- Search Results -->
+            <% if (searchResults.length > 0) { %>
+                <h2 class="text-xl font-bold mt-4">Search Results</h2>
+                <ul>
+                    <% searchResults.forEach(user => { %>
+                        <li class="flex items-center justify-between mt-2">
+                            <div class="flex items-center">
+                                <img src="<%= user.profilePicture ? user.profilePicture : '/images/user.png' %>" alt="User Avatar" class="w-10 h-10 rounded-full mr-3" />
+                                <span><%= user.username %></span>
+                            </div>
+                            <a href="/start-conversation/<%= user._id %>" class="bg-blue-500 text-white px-4 py-2 rounded">Chat</a>
+                        </li>
+                    <% }) %>
+                </ul>
+            <% } %>
+        </div>
+    </div>
+</body>
+</html>

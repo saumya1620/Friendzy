@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <nav class="bg-sky-950 p-4 flex items-center justify-between">
+        <!-- Logo and other navigation items -->
+        <div class="text-white text-xl font-semibold">
+            <a href="/">Friendzy</a>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="flex-grow mx-40">
+            <div class="relative">
+                <form action="/search" method="GET" class="flex items-center">
+                    <button type="submit" class="absolute left-2 top-1/2 transform -translate-y-1/2">
+                        <img src="/images/search (1).png" alt="Search" class="h-5 w-5 text-gray-500"/>
+                    </button>
+                    <input type="text" name="query" placeholder="Search..." class="w-1/2 pl-10 py-2 rounded-md bg-white border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+                </form>
+            </div>
+        </div>
+
+        <!-- Other navigation items here -->
+        <a href="/logout" class="text-white">Logout</a>
+    </nav>
+    
+    <div class="p-6">
+        <h1 class="text-2xl font-bold mb-4">Users found  "<%= query %>"</h1>
+        <ul class="space-y-4">
+            <% results.forEach(user => { %>
+                <li class="p-4 bg-white border border-gray-200 rounded-lg shadow-md">
+                    <a href="/profile/<%= user._id %>" class="text-blue-500 hover:underline">
+                        <%= user.username %>
+                    </a>
+                    <form action="/send-request" method="post" class="flex items-center">
+                        <input type="hidden" name="userId" value="<%= user._id %>">
+                        <button type="submit" class=" h-10 w-10 rounded"><img src="images/add-user.png" alt=""></button>
+                    </form>
+                </li>
+            <% }) %>
+        </ul>
+    </div>
+</body>
+</html>

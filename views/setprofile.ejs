@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Set Profile Picture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <nav class="bg-sky-950 p-4 flex items-center justify-between">
+        <!-- Logo and other navigation items -->
+        <div class="text-white text-xl font-semibold">
+            <a href="/">Friendzy</a>
+        </div>
+        <!-- Other navigation items here -->
+        <a href="/logout" class="text-white">Logout</a>
+    </nav>
+
+    <div class="relative flex min-h-screen flex-col justify-center overflow-hidden bg-sky-100 py-6 sm:py-12">
+      <div class="relative bg-white px-6 pt-10 pb-8 shadow-xl ring-1 ring-gray-900/5 sm:mx-auto sm:max-w-lg sm:rounded-lg sm:px-10">
+        <div class="mx-auto max-w-md">
+          <h1 class="text-2xl font-bold mb-4 ml-28">Set Profile Picture</h1>
+          <div class="mb-4">
+            <!-- Display default profile picture -->
+            <img src="/images/user.png" alt="Default Profile Picture" class="w-32 h-32 rounded-full mb-4 ml-36">
+            <!-- Form to upload profile picture -->
+            <form action="/uploadProfilePicture" method="POST" accept="image/*" enctype="multipart/form-data">
+                <input type="file" name="profilePicture" class="mb-4 ml-28">
+                <a href="/profile"><button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded ml-32 mr-32">Set Profile Picture</button></a>
+                <a href="/profile" class="ml-48 text-gray-600 mt-4">Skip</a>
+            </form>
+        </div>
+          
+            </div>
+            </div>
+            </div>
+
+
+
+    
+    <!-- <div class="p-6">
+        <h1 class="text-2xl font-bold mb-4">Set Profile Picture</h1>
+        <div class="mb-4">
+            Display default profile picture -->
+            <!-- <img src="/images/user.png" alt="Default Profile Picture" class="w-32 h-32 rounded-full mb-4"> -->
+            <!-- Form to upload profile picture -->
+            <!-- <form action="/uploadProfilePicture" method="POST" enctype="multipart/form-data">
+                <input type="file" name="profilePicture" class="mb-4">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Set Profile Picture</button>
+                <a href="/profile" class="ml-4 text-gray-600">Skip</a>
+            </form>
+        </div>
+    </div> -->
+</body>
+</html>

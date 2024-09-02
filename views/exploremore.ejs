@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body class="bg-blue-100">
+    <nav class="bg-sky-950 p-4 flex items-center justify-between">
+        <!-- Logo -->
+        <div class="text-white text-xl font-semibold">
+            <a href="/">Friendzy</a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="flex-grow mx-4 lg:mx-40">
+            <form action="/search" method="get" class="relative">
+                <button type="submit" class="absolute left-2 top-1/2 transform -translate-y-1/2">
+                    <img src="/images/search (1).png" alt="Search" class="h-5 w-5 text-gray-500" />
+                </button>
+                <input type="text" name="query" placeholder="Search..."
+                    class="w-full lg:w-1/2 pl-10 py-2 rounded-md bg-white border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            </form>
+        </div>
+
+        <!-- Notification and Message Icons -->
+        <div class="flex items-center space-x-4">
+            <button class="relative">
+                <i class="fas fa-bell fa-2x text-white mr-2"></i>
+            </button>
+            <button class="relative">
+                <a href="/conversations"><i class="fas fa-envelope fa-2x text-white mr-4"></i></a>
+            </button>
+        </div>
+
+        <!-- Profile and Hamburger Menu -->
+        <div class="relative flex items-center space-x-4">
+            <!-- Profile (Visible on larger screens) -->
+            <% if (user) { %>
+                <div class="hidden lg:flex items-center">
+                    <img src="<%= user.profilePicture %>" alt="Profile Picture"
+                        class="w-10 h-10 rounded-full mr-2">
+                    <a href="/about" class="text-white font-semibold"><%= user.username %></a>
+                </div>
+                <a href="/logout" class="hidden lg:block text-white">Logout</a>
+            <% } %>
+
+            <!-- Hamburger Menu (Visible on smaller screens) -->
+            <div class="lg:hidden">
+                <button id="settingsMenuButton" class="text-white">
+                    <i class="fas fa-bars fa-2x"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Dropdown Menu -->
+        <div id="settingsMenu" class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg hidden lg:hidden">
+            <% if (user) { %>
+                <div class="flex items-center p-4 border-b border-gray-200">
+                    <img src="<%= user.profilePicture %>" alt="Profile Picture"
+                        class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <a href="/about" class="text-gray-800 font-semibold"><%= user.username %></a>
+                    </div>
+                </div>
+                <a href="/logout" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Logout</a>
+            <% } else { %>
+                <a href="/login" class="block px-4 py-2 text-gray-800 hover:bg-gray-100">Login</a>
+            <% } %>
+        </div>
+    </nav>
+    <div id="image-grid" class="grid grid-cols-5 gap-4 w-full h-auto">
+        <!-- Images will be dynamically inserted here -->
+      </div>
+    </div>
+    <script>
+      // Fetch images from the API and insert them into the grid
+      async function fetchImages() {
+        try {
+          const response = await fetch("/api/explore-images");
+          let images = await response.json();
+
+          // Limit to 9 images
+          images = images.slice(0, 100);
+
+          const gridContainer = document.getElementById("image-grid");
+          gridContainer.innerHTML = ""; // Clear previous content
+
+          images.forEach((image) => {
+            const imgElement = document.createElement("img");
+            imgElement.src = image.urls.small; // or image.urls.regular for larger images
+            imgElement.alt = image.alt_description;
+            imgElement.className = "w-full h-full object-cover rounded-lg"; // Adjust size and aspect ratio
+
+            gridContainer.appendChild(imgElement);
+          });
+        } catch (error) {
+          console.error("Error fetching images:", error);
+        }
+      }
+
+      fetchImages();
+
+      </script>
+    
+</body>
+
+</html>
