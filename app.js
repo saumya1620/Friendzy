@@ -1,24 +1,72 @@
 const express = require('express')
+const multer = require('multer')
+const socketio = require('socket.io');
 const path = require('path')
 const cookieParser = require('cookie-parser')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const appModels = require('./models');
-const multer  = require('multer')
-const upload = multer({ dest: 'public/images/posts/' })
-const { Post, Comment, User } = appModels;
-const axios = require('axios');
-require('dotenv').config();
-
 const app = express()
-const secret = 'your_jwt_secret_key'
-
-//Middleware
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 app.use(express.static(path.join(__dirname,'public')))
 app.use(cookieParser())
 app.set('view engine','ejs')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+const usermodel = require('./models/user')
+const postmodel = require('./models/post')
+const requestmodel = require('./models/requests')
+const Message = require('./models/message')
+const Conversation = require('./models/conversation')
+const mongoose = require('mongoose')
+const { verify } = require('crypto')
+const http = require('http');
+const server = http.createServer(app);
+const axios = require('axios');
+const dotenv = require('dotenv').config();
+const secret = 'your_jwt_secret_key';
+const io = socketio(server);
+
+//heading : socket 
+
+io.on('connection', (socket) => {
+    console.log('A user connected');
+
+    socket.on('sendMessage', async (data) => {
+        const { conversationId, content } = data;
+        const newMessage = new Message({
+            conversation: conversationId,
+            sender: socket.user.id, // Ensure the user is authenticated
+            content
+        });
+        await newMessage.save();
+        await Conversation.findByIdAndUpdate(conversationId, {
+            $push: { messages: newMessage._id }
+        });
+
+        io.to(conversationId).emit('receiveMessage', newMessage); // Emit the message to all users in the conversation
+    });
+
+    socket.on('joinConversation', (conversationId) => {
+        socket.join(conversationId);
+    });
+
+    socket.on('disconnect', () => {
+        console.log('A user disconnected');
+    });
+});
+
+//heading : multer
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'images/uploads/'); 
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+const upload = multer({ storage });
+
+//heading : for cookies
 
 function verifyToken(req, res, next) {
     const token = req.cookies.token;
@@ -35,38 +83,16 @@ function verifyToken(req, res, next) {
     });
 }
 
-app.get('/', verifyToken,async(req,res)=>
+//heading : main page for account creation 
+
+app.get('/',(req,res)=>
 {
-    const suggestedUsers = [
-        { name: 'suman', avatar: '/path/to/avatar1.png' },
-        { name: 'Kaji', avatar: '/path/to/avatar2.png' },
-        // Add more users as needed
-      ];
-      const posts = await appModels.posts.find({author: req.user.id});
-
-      
-      res.render('index', {
-        user: req.user, 
-        suggestedUsers: suggestedUsers,
-        posts : posts
-    }); 
+    res.render('index')
 })
-
-app.get('/profile', verifyToken, async (req, res) => {
-    const user = await appModels.users.findById(req.user.id);
-    const sidebarLinks = [
-        { label: 'Home', route: '/', imgURL: 'public/images/Friendzy.png' },
-        { label: 'Profile', route: '/profile', imgURL: '/public/images/user.png' },
-        // Add more links as needed
-    ];
-    res.render('profile', { user, sidebarLinks, pathname: '/profile' });
-});
-
-
 app.post('/create',async (req,res)=>
 {
     let { username, email, phonenumber, password, confirmPassword, gender, date } = req.body;
-    let usercreated = await appModels.users.findOne({username})
+    let usercreated = await usermodel.findOne({username})
     
     if(usercreated) 
     {
@@ -85,7 +111,7 @@ app.post('/create',async (req,res)=>
     {
         bcrypt.hash(password,salt,async (err,hash)=>
         {
-            usercreated = await appModels.users.create ({
+            usercreated = await usermodel.create ({
                 username,
                 email,
                 phonenumber,
@@ -95,7 +121,7 @@ app.post('/create',async (req,res)=>
 
             })
             console.log(usercreated)
-            return res.redirect('/login?welcome=true')
+            return res.redirect('/setprofile?welcome=true')
             
             
         })
@@ -104,6 +130,23 @@ app.post('/create',async (req,res)=>
     
 })
 
+//heading : for setting profile picture (not working)
+
+app.get('/setprofile', (req, res) => {
+    res.render('setprofile');
+});
+
+
+app.post('/uploadProfilePicture', verifyToken, upload.single('profilePicture'), async (req, res) => {
+    const userId = req.user.id;
+    const profilePicturePath = req.file ? req.file.path : '/images/user.png';
+
+    await usermodel.findByIdAndUpdate(userId, { profilePicture: profilePicturePath });
+
+    res.redirect('/profile');
+});
+
+//heading : login page
 
 app.get('/login',(req,res)=>
 {
@@ -111,7 +154,7 @@ app.get('/login',(req,res)=>
 })
 
 app.post('/login', async (req,res) => {
-    let user = await appModels.users.findOne({username: req.body.username})
+    let user = await usermodel.findOne({username: req.body.username})
     console.log(user)
     if(!user) res.redirect('/?incorrect=true');
 
@@ -121,8 +164,7 @@ app.post('/login', async (req,res) => {
             let token = jwt.sign({ id: user._id, username: user.username }, secret);
             res.cookie('token', token, { httpOnly: true})
             
-            // res.status(200).render('profile',{user})
-            res.redirect('/');
+            res.status(200).render('profile',{user})
         }
         else
         {
@@ -131,55 +173,45 @@ app.post('/login', async (req,res) => {
         }
     })
 })
-app.get('/signup',(req,res)=>{
-    res.render('signup');
-})
-// app.get('/profile',verifyToken, async (req,res)=>
-// {
-//     const user = await appModels.users.findById(req.user.id);
-//     res.render('profile', { user });
 
-// })
+//heading : this is main page 
 
-app.post('/posts',verifyToken, upload.fields([{name:"post-img", maxCount:1}, {name:"video-img", maxCount:1}]), async (req,res)=>{
-    console.log("files",req.files);
-    const imageFiles = req.files['post-image'];
-    
-    const post = await appModels.posts.create({
-    author: req.user.id,
-    content: req.body.post,
-    createdAt: new Date(),
-    updatedAt: new Date()
-    });
+app.get('/profile',verifyToken, async (req,res)=>
+{
+    const user = await usermodel.findById(req.user.id).populate('friends')
+    .populate('friends', 'username profilePicture')
+    .populate('friendRequests', 'username profilePicture')
+    .populate('suggestions', 'username profilePicture');
+    let suggestions = await usermodel.find({ _id: { $ne: req.user.id } })
+    suggestions = suggestions.filter(suggestion => 
+        !user.friends.some(friend => friend._id.equals(suggestion._id))
+    );
+    const posts = await postmodel.find({ author: req.user.id })
+    res.render('profile', { user,posts,suggestions});
 
-    // res.send("Posted");
-    res.redirect("/");
 })
 
-app.get('/', verifyToken, async (req, res) => {
+app.get('/profile/:id', async (req, res) => {
     try {
-        const posts = await Post.find({ author: req.user.id })
-            .populate('likes') // Populate if necessary
-            .populate({
-                path: 'comments',
-                populate: {
-                    path: 'userId', // Assuming comments have userId field
-                    select: 'username'
-                }
-            });
+        const userId = req.params.id;
+        const user = await usermodel.findById(userId).populate('friends').exec();
+        const posts = await postmodel.find({ author: userId }).sort({ createdAt: -1 });
+        const currentUserId = req.user ? req.user._id : null; // Assuming req.user contains the logged-in user's data
         
-        res.render('index', {
-            user: req.user,
-            suggestedUsers: suggestedUsers,
-            posts: posts
-        });
-    } catch (err) {
-        console.error(err);
-        res.redirect('/login');
+        res.render('userprofile', { user, currentUserId,posts });
+    } catch (error) {
+        res.status(500).send('Server error');
     }
 });
 
-// Define your
+//heading : explore page
+
+app.get('/exploremore',verifyToken,async(req,res)=>
+{
+    
+    const user = await usermodel.findById(req.user.id)
+    res.render('exploremore',{user})
+})
 app.get('/api/explore-images', async (req, res) => {
     try {
         const UNSPLASH_ACCESS_KEY = process.env.UNSPLASH_ACCESS_KEY;
@@ -191,81 +223,238 @@ app.get('/api/explore-images', async (req, res) => {
     }
 });
 
+//heading : conversation page (list of conversations)
 
-// Like a post
-app.post('/posts/:postId/like', verifyToken, async (req, res) => {
-    try {
-      const postId = req.params.postId;
-      const userId = req.user.id;
-  
-      const post = await appModels.posts.findById(postId);
-  
-      if (post.likes.includes(userId)) {
-        // Unlike if already liked
-        post.likes.pull(userId);
-      } else {
-        // Like if not already liked
-        post.likes.push(userId);
-      }
-  
-      await post.save();
-      res.redirect('back'); // Redirect back to the previous page
-    } catch (err) {
-      console.error(err);
-      res.redirect('back'); // Handle errors and redirect
-    }
-  });
-  //post a comment
-  app.post('/posts/:postId/comments', verifyToken, async (req, res) => {
-    try {
-        const postId = req.params.postId;
-        const userId = req.user.id;
-        const commentContent = req.body.commentContent;
-
-        // Create a new comment
-        const comment = await Comment.create({
-            content: commentContent,
-            post: postId,
-            author: userId
+app.get('/conversations',verifyToken,async(req,res)=>
+    {
+        const user = await usermodel.findById(req.user.id).populate('friends');
+        const searchQuery = req.query.query || '';
+        
+            const conversations = await Conversation.find({ participants: req.user.id }).populate('participants');
+            let searchResults = [];
+        
+            if (searchQuery) {
+                searchResults = await usermodel.find({
+                    username: new RegExp(searchQuery, 'i'),
+                    _id: { $ne: req.user.id } 
+                });
+            }
+        
+            res.render('conversations', {
+                conversations,
+                searchResults,
+                query: searchQuery,
+                user 
+            });
         });
-
-        // Add the comment to the post's comments array
-        await Post.findByIdAndUpdate(postId, {
-            $push: { comments: comment._id }
+      
+    //heading : for particular conversation
+    
+    app.get('/message/:conversationId',verifyToken,async(req,res)=>
+    {
+        const searchResults=[]
+        const query = req.query.query
+        const userId = req.query.userId;
+        const user = await usermodel.findById(userId)
+        const conversationId = req.params.conversationId;
+        const currentUser = req.user;
+        const users = await usermodel.find({ _id: { $ne: currentUser._id } });
+    
+        const activeConversation = await Conversation.findById(conversationId).populate('participants') .populate('participants')
+        .populate({
+            path: 'messages',
+            populate: {
+                path: 'sender',
+                select: 'username _id'
+            }
         });
+            const messages = await Message.find({ conversation: conversationId }).populate('sender','username _id');
+            const validMessages = messages.filter(message => message.sender && message.sender._id);
+            const conversations = await Conversation.find({ participants: req.user.id }).populate('participants');
+    
+            res.render('message', {
+                activeConversation,
+                messages:validMessages,
+                conversations,
+                currentUser,
+                user,
+                query,
+                searchResults,
+                users,
+                conversationId
+            });
+    })
+    
 
-        res.redirect('/posts/${postId}'); // Redirect to the post page or another appropriate page
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Server error');
-    }
-});
-// Like a comment
-app.post('/comments/:commentId/like', verifyToken, async (req, res) => {
-    try {
-        const commentId = req.params.commentId;
-        const userId = req.user.id;
-
-        const comment = await Comment.findById(commentId);
-
-        if (!comment.likes) comment.likes = [];
-        if (comment.likes.includes(userId)) {
-            comment.likes.pull(userId);
-        } else {
-            comment.likes.push(userId);
+    app.get('/start-new-conversation',verifyToken,async(req,res)=>
+    {
+        const user = await usermodel.findById(req.user.id).populate('friends');
+            const friends = user.friends;
+    
+            res.render('startConversation', { friends, currentUser: req.user,user });
+    })
+    
+    app.post('/sendMessage', verifyToken, async (req, res) => {
+        try {
+            const { conversationId,content } = req.body;
+            
+           
+            
+            console.log('Received data:', { conversationId, content });
+    
+            if (!conversationId || !content) {
+                return res.status(400).send('Conversation ID and content are required.');
+            }
+    
+            const newMessage = new Message({
+                conversation:conversationId,
+                sender: req.user.id,
+                content
+            });
+    
+            await newMessage.save();
+            await Conversation.findByIdAndUpdate(conversationId, {
+                $push: { messages: newMessage._id }
+              });
+            const conversation = await Conversation.findById(conversationId).populate('participants');
+        if (conversation) {
+            // Assuming `participants` is an array of user IDs
+            const participantIds = conversation.participants.map(p => p._id.toString());
+            participantIds.forEach(async (participantId) => {
+                // Assuming there's a method to add the latest message to each user's conversation
+                await User.updateOne(
+                    { _id: participantId, 'conversations._id': conversationId },
+                    { $push: { 'conversations.$.messages': newMessage._id } }
+                );
+            });
         }
+            res.redirect(`/message/${conversationId}`);
+        } catch (error) {
+            console.error('Error sending message:', error);
+            res.status(500).send('Internal Server Error');
+        }
+    });
 
-        await comment.save();
-        res.redirect('back');
-    } catch (err) {
-        console.error(err);
-        res.redirect('back');
+//heading : Search bar 
+
+app.get('/search', verifyToken, async (req, res) => {
+    const query = req.query.query;
+    if (!query) {
+        return res.render('notfound');
     }
+    const results = await usermodel.find({username:new RegExp(query, 'i')}); 
+    res.render('searchResults', { results, query });
 });
+
+//heading : search bar at conversation page
+
+app.get('/searchuserchat', verifyToken, async (req, res) => {
+    const query = req.query.query;
+    if (!query) {
+        return res.render('notfound');
+    }
+    const results = await usermodel.find({username:new RegExp(query, 'i')}); 
+    res.render('searchuserchat', { results, query });
+});
+
+//heading : about page
+
+app.get('/about', verifyToken, async (req, res) => {
+    const user = await usermodel.findById(req.user.id).populate('friends')
+    .populate('friends', 'username profilePicture')
+    .populate('friendRequests', 'username profilePicture')
+    .populate('suggestions', 'username profilePicture');
+    const posts = await postmodel.find({ author: req.user.id })
+    let suggestions = await usermodel.find({ _id: { $ne: req.user.id } })
+    suggestions = suggestions.filter(suggestion => 
+        !user.friends.some(friend => friend._id.equals(suggestion._id))
+    );
+    res.render('about', { user,posts,suggestions});
+});
+app.get('/suggestions', verifyToken, async (req, res) => {
+    const user = await usermodel.findById(req.user.id).populate('suggestions', 'username profilePicture');
+    res.render('about', { suggestions: user.suggestions });
+});
+app.get('/friendRequests', verifyToken, async (req, res) => {
+    const user = await usermodel.findById(req.user.id).populate('friendRequests', 'username profilePicture');
+    res.render('friendRequests', { friendRequests: user.friendRequests });
+});
+app.post('/accept-friend', verifyToken, async (req, res) => {
+    const requestId = req.body.requestId;
+
+    const user = await usermodel.findById(req.user.id);
+    if (user.friendRequests.includes(requestId)) {
+        user.friends.push(requestId);
+        user.friendRequests.pull(requestId);
+        await user.save();
+
+        const requester = await usermodel.findById(requestId);
+        if (requester) {
+            requester.friends.push(req.user.id);
+            await requester.save();
+        }
+    }
+    return res.redirect('/about?friends=true');
+});
+
+app.post('/send-request', verifyToken, async (req, res) => {
+    const suggestionId = req.body.suggestionId;
+    
+
+    const user = await usermodel.findById(req.user.id);
+    const suggestion = await usermodel.findById(suggestionId);
+
+    if (suggestion && !suggestion.friendRequests.includes(req.user.id) && !suggestion.friends.includes(req.user.id)) {
+        suggestion.friendRequests.push(req.user.id);
+        await suggestion.save();
+    }
+
+    return res.redirect('/about?request=true');
+});
+
+app.post('/remove-friend', verifyToken, async (req, res) => {
+    const user = await usermodel.findById(req.user.id)
+    const { friendId } = req.body;
+
+    
+    await usermodel.findByIdAndUpdate(req.user.id, {
+        $pull: { friends: friendId }
+    });
+
+    
+    await usermodel.findByIdAndUpdate(friendId, {
+        $pull: { friends: req.user.id }
+    });
+
+    res.redirect('/about');
+});
+
+app.get('/editbio', verifyToken, (req, res) => {
+    res.render('editbio', { user: req.user });
+});
+app.post('/updateBio', verifyToken, async (req, res) => {
+    const { bio } = req.body;
+    const userId = req.user.id;
+
+    await usermodel.findByIdAndUpdate(userId, { bio });
+
+    res.redirect('/about');
+});
+
+app.post('/posts',verifyToken, async (req,res)=>{
+    console.log("Hello x", req.body.post);
+    const post = await postmodel.create({
+    author: req.user.id,
+    content: req.body.post,
+    createdAt: new Date(),
+    updatedAt: new Date()
+    });
+    res.redirect("/about");
+})
+
 
 app.get('/logout',(req,res)=>
 {
-    // res.cookie('token','')
     res.clearCookie('token');
     res.redirect('/login')
 })
