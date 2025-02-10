@@ -1,4 +1,5 @@
 # Friendzy - A Social Media Application
+
 **Friendzy** is a full-stack social media application that enables users to post, comment, engage in conversations, send messages, modify their profiles, manage friend requests, and handle user interactions efficiently. Built with **React, EJS, MongoDB**, and **Node.js**, Friendzy offers a seamless social networking experience.
 
 ## 🚀Features
